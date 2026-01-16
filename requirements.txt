@@ -1,0 +1,10 @@
+streamlit
+langchain==0.1.16
+langchain-community==0.0.32
+langchain-core==0.1.45
+chromadb
+pypdf
+pdfplumber
+sentence-transformers
+transformers
+torch
