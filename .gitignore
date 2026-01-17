@@ -7,10 +7,16 @@ __pycache__/
 
 # Virtual environment
 venv/
+pdfchatbot_env/
 .env/
 
 # Streamlit
 .streamlit/
+
+#raw notebooks
+raw/
+working_bkp/
+
 
 # Chroma / Vector DB
 chroma_db/
