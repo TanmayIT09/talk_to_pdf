@@ -1,10 +1,9 @@
-streamlit
+streamlit>=1.31.0
+
 langchain==0.1.16
 langchain-community==0.0.32
-langchain-core==0.1.45
-chromadb
-pypdf
-pdfplumber
-sentence-transformers
-transformers
-torch
+
+chromadb>=0.4.24
+pdfplumber>=0.10.3
+
+ollama
