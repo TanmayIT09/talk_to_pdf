@@ -255,11 +255,28 @@ def main():
     persist_dir = os.path.join(CHROMA_BASE_DIR, file_hash)
 
     if st.session_state.vector_db is None:
-        with st.spinner("Processing PDF..."):
-            documents = load_pdf_as_documents(uploaded_file)
-            splitter = load_text_splitter()
-            split_docs = splitter.split_documents(documents)
-            st.session_state.vector_db = build_or_load_vectorstore(split_docs, persist_dir)
+        if os.path.exists(persist_dir):
+            st.session_state.vector_db = Chroma(
+                persist_directory=persist_dir,
+                embedding_function=load_embeddings()
+            )
+        else:
+            with st.spinner("Processing PDF (first time only)..."):
+                progress = st.progress(0.0)
+
+                progress.progress(0.2, text="Extracting text from PDF...")
+                documents = load_pdf_as_documents(uploaded_file)
+
+                progress.progress(0.5, text="Splitting text into chunks...")
+                splitter = load_text_splitter()
+                split_docs = splitter.split_documents(documents)
+
+                progress.progress(0.8, text="Generating embeddings & saving vector store...")
+                st.session_state.vector_db = build_or_load_vectorstore(
+                    split_docs, persist_dir
+                )
+
+                progress.progress(1.0, text="Done ✅")
 
     st.success("PDF ready. Ask your questions 👇")
 
