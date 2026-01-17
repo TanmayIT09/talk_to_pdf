@@ -34,6 +34,24 @@ if os.path.exists(".env"):
 os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
+CHROMA_DIR = "chroma_db"
+
+@st.cache_resource
+def get_vectorstore(text_chunks):
+    if os.path.exists(CHROMA_DIR):
+        return Chroma(
+            embedding_function=embeddings,
+            persist_directory=CHROMA_DIR
+        )
+
+    return Chroma.from_texts(
+        texts=text_chunks,
+        embedding=embeddings,
+        persist_directory=CHROMA_DIR
+    )
+    db.persist()
+    return db
+
 def get_conversational_chain():
     # prompt_template = """
     # Answer the question as detailed as possible from the provided context, make sure to provide all the details, if the answer is not in
@@ -61,7 +79,7 @@ def get_conversational_chain():
     return chain
 
 # Initialize Streamlit app
-st.title("PDF Text Similarity Search")
+st.title("Chat with your PDF")
 
 # Upload PDF file
 uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
@@ -81,14 +99,16 @@ if uploaded_file is not None:
     #embeddings = GoogleGenerativeAIEmbeddings(model = "models/embedding-001")
     embeddings = OllamaEmbeddings(model="nomic-embed-text")
 
-    # Store vector representations in Chroma DB
-    vector_db_path = "./chroma_db"  # Adjust the path as needed
+    # # Store vector representations in Chroma DB
+    # vector_db_path = "./chroma_db"  # Adjust the path as needed
 
-    if os.path.exists(vector_db_path):
-        shutil.rmtree(vector_db_path)   # delete old embeddings
+    # if os.path.exists(vector_db_path):
+    #     shutil.rmtree(vector_db_path)   # delete old embeddings
 
     #db = Chroma.from_texts(text_chunks, embedding=embeddings, persist_directory=vector_db_path)
-    db = Chroma.from_texts(text_chunks, embedding=embeddings)
+    #db = Chroma.from_texts(text_chunks, embedding=embeddings)
+
+    db = get_vectorstore(text_chunks)
 
     # Perform similarity search (user query)
     user_query = st.text_input("Enter your query:")
@@ -104,3 +124,4 @@ if uploaded_file is not None:
         #st.write("Similar documents:")
         #for doc_id, score in similar_documents:
         #    st.write(f"Document ID: {doc_id}, Similarity Score: {score:.4f}")
+
